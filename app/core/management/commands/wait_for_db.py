@@ -15,11 +15,11 @@ class Command(BaseCommand):
 
     def handle(self, *args: Any, **options: Any):
         self.stdout.write("Waiting for database...")
-        db_up = True
+        db_up = False
 
         while not db_up:
             try:
-                self.check(database=['default'])
+                self.check(databases=['default'])
                 db_up = True
             except (OperationalError, Psycopg2OpError):
                 self.stdout.write('Database unavailable, waiting 1 second...')
