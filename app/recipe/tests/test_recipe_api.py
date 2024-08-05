@@ -14,7 +14,7 @@ from core.models import Recipe
 
 from recipe.serializers import RecipeSerializer
 
-RECIPE_URL = reverse('recipe:')
+RECIPES_URL = reverse('recipe:recipe-list')
 
 
 def create_recipe(user, **params):
@@ -39,7 +39,7 @@ class PuplcicRecipeAPITests(TestCase):
 
     def test_auth_required(self):
         """Test auth is required to call API."""
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         self.assertEqual(res.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -53,7 +53,7 @@ class PrivateRecipeApiTests(TestCase):
             "user@example.com",
             "testpass123",
         )
-        self.client.forceauthenticate(self.user)
+        self.client.force_authenticate(self.user)
 
     def test_retrieve_recipes(self):
         """Test retrieve a list a of recipes."""
@@ -61,7 +61,7 @@ class PrivateRecipeApiTests(TestCase):
         create_recipe(user=self.user)
         create_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         recipes = Recipe.objects.all().order_by("-id")
 
@@ -75,10 +75,10 @@ class PrivateRecipeApiTests(TestCase):
                     "other@example.com",
                     "testpass123",
                 )
-        create_recipe(user=self.other_user)
+        create_recipe(user=other_user)
         create_recipe(user=self.user)
 
-        res = self.client.get(RECIPE_URL)
+        res = self.client.get(RECIPES_URL)
 
         recipes = Recipe.objects.filter(user=self.user)
         serialzer = RecipeSerializer(recipes, many=True)
