@@ -17,12 +17,12 @@ from recipe.serializers import (
     RecipeDetailSerializer,
 )
 
-RECIPES_URL = reverse('recipe:recipe-list')
+RECIPES_URL = reverse("recipe:recipe-list")
 
 
 def detail_url(reipe_id):
     """Create and return a recipe details URL."""
-    return reverse('recipe:recipe-detail', args=[reipe_id])
+    return reverse("recipe:recipe-detail", args=[reipe_id])
 
 
 def create_recipe(user, **params):
@@ -76,13 +76,13 @@ class PrivateRecipeApiTests(TestCase):
         serialzer = RecipeSerializer(recipes, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serialzer.data)
-    
+
     def test_recipe_list_limited_to_user(self):
         """Test list of recipe is limited to authenticated user."""
         other_user = get_user_model().objects.create_user(
-                    "other@example.com",
-                    "testpass123",
-                )
+            "other@example.com",
+            "testpass123",
+        )
         create_recipe(user=other_user)
         create_recipe(user=self.user)
 
@@ -102,3 +102,18 @@ class PrivateRecipeApiTests(TestCase):
 
         serializer = RecipeDetailSerializer(recipe)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_recipe(self):
+        """ "Test creating a recipe."""
+        payload = {
+            "title": "Sanmple recipe",
+            "time_minutes": 30,
+            "price": Decimal("5.99"),
+        }
+        res = self.client.post(RECIPES_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Recipe.objects.get(id=res.data["id"])
+        for k, v in payload.items():
+            self.assertEqual(getattr(recipe, k), v)
+        self.assertEqual(recipe.user, self.user)
