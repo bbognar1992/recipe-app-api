@@ -14,7 +14,6 @@ from rest_framework.test import APIClient
 from core.models import (
     Recipe, Tag
 )
-from recipe.apps import RecipeConfig
 
 from recipe.serializers import (
     RecipeSerializer,
@@ -249,12 +248,12 @@ class PrivateRecipeApiTests(TestCase):
             self.assertTrue(exists)
 
     def test_create_tag_on_update(self):
-        """Test creating tag when updaing a recipe"""
+        """Test creating tag when updating a recipe"""
         recipe = create_recipe(user=self.user)
 
         payload = {'tags': [{'name': 'Lunch'}]}
         url = detail_url(recipe.id)
-        res = self.client.patch(url, payload=payload, format='json')
+        res = self.client.patch(url, payload, format='json')
 
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         new_tag = Tag.objects.get(user=self.user, name='Lunch')
@@ -278,7 +277,7 @@ class PrivateRecipeApiTests(TestCase):
     def test_clear_recipe_tags(self):
         """Test clearing a recipe tags"""
         tag = Tag.objects.create(user=self.user, name='Dessert')
-        recipe = create_recipe(user=self.user, name='Dessert')
+        recipe = create_recipe(user=self.user)
         recipe.tag.add(tag)
 
         payload = {'tags': []}
